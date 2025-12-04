@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выбор организации</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            padding: 16px;
+        }
+
+        .container {
+            max-width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 12px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #999999);
+        }
+
+        .selected-info {
+            margin-bottom: 20px;
+            padding: 16px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .selected-organization {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--tg-theme-button-color, #2481cc);
+        }
+
+        .selected-department {
+            font-size: 14px;
+            margin-top: 8px;
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .organizations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .organization-button {
+            padding: 16px 8px;
+            border: none;
+            border-radius: 12px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000000);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            word-break: break-word;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .organization-button:hover {
+            background: var(--tg-theme-hint-color, #e0e0e0);
+        }
+
+        .organization-button.selected {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .department-selection {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 12px;
+        }
+
+        .department-header {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .departments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px;
+        }
+
+        .department-button {
+            padding: 12px 8px;
+            border: none;
+            border-radius: 8px;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .department-button:hover {
+            background: var(--tg-theme-hint-color, #f5f5f5);
+        }
+
+        .department-button.selected {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            position: sticky;
+            bottom: 0;
+            background: var(--tg-theme-bg-color, #ffffff);
+            padding: 10px 0;
+            margin-top: 10px;
+        }
+
+        .action-button {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-button:active {
+            transform: scale(0.95);
+        }
+
+        .confirm {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .cancel {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .confirm:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .confirm:disabled:active {
+            transform: none;
+        }
+
+        /* Модальное окно для списка */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-content {
+            background: var(--tg-theme-bg-color, #ffffff);
+            border-radius: 16px;
+            padding: 20px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--tg-theme-secondary-bg-color, #f0f0f0);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--tg-theme-text-color, #000000);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .modal-close:hover {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+        }
+
+        .full-list-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 8px;
+        }
+
+        .full-list-button {
+            padding: 12px 8px;
+            border: none;
+            border-radius: 8px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000000);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .full-list-button:hover {
+            background: var(--tg-theme-hint-color, #e0e0e0);
+        }
+
+        .full-list-button.selected {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .show-full-list {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 24px;
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .show-full-list:hover {
+            background: #1a6db5;
+        }
+
+        @media (max-width: 480px) {
+            .organizations-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .departments-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full-list-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Выбор организации</h1>
+            <p>Выберите организацию и при необходимости подразделение</p>
+        </div>
+
+        <div class="selected-info">
+            <div>Выбрана организация: <span class="selected-organization" id="selectedOrganization">не выбрана</span></div>
+            <div class="selected-department" id="selectedDepartmentContainer" style="display: none;">
+                Подразделение: <span class="selected-department" id="selectedDepartment">не выбрано</span>
+            </div>
+        </div>
+
+        <div class="organizations-grid" id="organizationsGrid">
+            <!-- Организации будут добавлены через JS -->
+        </div>
+
+        <div class="department-selection" id="departmentSelection" style="display: none;">
+            <div class="department-header">Выберите подразделение:</div>
+            <div class="departments-grid" id="departmentsGrid">
+                <!-- Подразделения будут добавлены через JS -->
+            </div>
+        </div>
+
+        <button class="show-full-list" onclick="showFullList()">Показать все организации</button>
+
+        <div class="actions">
+            <button class="action-button cancel" onclick="cancelSelection()">Отмена</button>
+            <button class="action-button confirm" id="confirmButton" onclick="confirmSelection()" disabled>Выбрать</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно для полного списка -->
+    <div class="modal-overlay" id="fullListModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Все организации</div>
+                <button class="modal-close" onclick="hideFullList()">×</button>
+            </div>
+            <div class="full-list-grid" id="fullListGrid">
+                <!-- Все организации будут добавлены через JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
+
+        // Данные организаций
+        const organizations = [
+            "ГК Союз",
+            "Союз-Инвест",
+            {
+                name: "Спецстрой",
+                hasDepartments: true,
+                departments: [
+                    "Строительно-монтажный участок - 1",
+                    "Строительно-монтажный участок - 2",
+                    "Строительно-монтажный участок - 3",
+                    "Строительно-монтажный участок - 4",
+                    "Участок по обслуживанию грузоподъемных механизмов",
+                    "Транспортный участок",
+                    "Административно-управленческое подразделение",
+                    "Строительно-монтажный участок (АУП)",
+                    "Производственно-технический отдел",
+                    "Административно-хозяйственный отдел",
+                    "Отдел главного энергетика",
+                    "Служба безопасности"
+                ]
+            },
+            "Союз-Инжиниринг",
+            "Союз-маркет",
+            "Опора",
+            "Вертикаль",
+            "Спецтехника",
+            "Сила тока",
+            "ОМТС",
+            "Альтстрой",
+            "НКЖБИ-2",
+            "ЗКМ Союз",
+            "ЖБИ НСК",
+            "Стройцентр",
+            "Юнион-метал",
+            "ИП Мельник",
+            "ИП Мелехов",
+            "Мелехов (доп)",
+            "ИП Ярох",
+            "ИП Тарасов",
+            "ИП Толстопятов",
+            "ИП Зяблицкий",
+            "ИП Багликов",
+            "ИП Степанов",
+            "ИП Глуменко",
+            "СК Сети",
+            "ИП Ивашин"
+        ];
+
+        let selectedOrganization = null;
+        let selectedDepartment = null;
+
+        // Основные организации для главной сетки
+        const mainOrganizations = [
+            "ГК Союз",
+            "Союз-Инвест",
+            "Спецстрой",
+            "Союз-Инжиниринг",
+            "Союз-маркет",
+            "Опора",
+            "Вертикаль",
+            "Спецтехника"
+        ];
+
+        function initApp() {
+            renderMainOrganizations();
+            updateSelectionDisplay();
+            updateConfirmButton();
+        }
+
+        function renderMainOrganizations() {
+            const grid = document.getElementById('organizationsGrid');
+            grid.innerHTML = '';
+
+            mainOrganizations.forEach(orgName => {
+                const org = organizations.find(o =>
+                    typeof o === 'string' ? o === orgName : o.name === orgName
+                );
+                const button = document.createElement('button');
+                button.className = 'organization-button';
+                if (selectedOrganization &&
+                    ((typeof selectedOrganization === 'string' && selectedOrganization === orgName) ||
+                     (typeof selectedOrganization === 'object' && selectedOrganization.name === orgName))) {
+                    button.classList.add('selected');
+                }
+                button.textContent = orgName;
+                button.onclick = () => selectOrganization(org);
+                grid.appendChild(button);
+            });
+        }
+
+        function showFullList() {
+            const modal = document.getElementById('fullListModal');
+            const grid = document.getElementById('fullListGrid');
+            grid.innerHTML = '';
+
+            organizations.forEach(org => {
+                const orgName = typeof org === 'string' ? org : org.name;
+                const button = document.createElement('button');
+                button.className = 'full-list-button';
+                if (selectedOrganization &&
+                    ((typeof selectedOrganization === 'string' && selectedOrganization === orgName) ||
+                     (typeof selectedOrganization === 'object' && selectedOrganization.name === orgName))) {
+                    button.classList.add('selected');
+                }
+                button.textContent = orgName;
+                button.onclick = () => {
+                    selectOrganization(org);
+                    hideFullList();
+                };
+                grid.appendChild(button);
+            });
+
+            modal.style.display = 'flex';
+        }
+
+        function hideFullList() {
+            document.getElementById('fullListModal').style.display = 'none';
+        }
+
+        function selectOrganization(org) {
+            selectedOrganization = org;
+            selectedDepartment = null;
+
+            // Показываем выбор подразделения если нужно
+            const departmentSelection = document.getElementById('departmentSelection');
+            if (typeof org === 'object' && org.hasDepartments) {
+                departmentSelection.style.display = 'block';
+                renderDepartments(org.departments);
+            } else {
+                departmentSelection.style.display = 'none';
+            }
+
+            updateSelectionDisplay();
+            renderMainOrganizations();
+            updateConfirmButton();
+        }
+
+        function renderDepartments(departments) {
+            const grid = document.getElementById('departmentsGrid');
+            grid.innerHTML = '';
+
+            departments.forEach(dept => {
+                const button = document.createElement('button');
+                button.className = 'department-button';
+                if (selectedDepartment === dept) {
+                    button.classList.add('selected');
+                }
+                button.textContent = dept;
+                button.onclick = () => selectDepartment(dept);
+                grid.appendChild(button);
+            });
+        }
+
+        function selectDepartment(dept) {
+            selectedDepartment = dept;
+            renderDepartments(selectedOrganization.departments);
+            updateSelectionDisplay();
+            updateConfirmButton();
+        }
+
+        function updateSelectionDisplay() {
+            const orgElement = document.getElementById('selectedOrganization');
+            const deptContainer = document.getElementById('selectedDepartmentContainer');
+            const deptElement = document.getElementById('selectedDepartment');
+
+            if (selectedOrganization) {
+                const orgName = typeof selectedOrganization === 'string'
+                    ? selectedOrganization
+                    : selectedOrganization.name;
+                orgElement.textContent = orgName;
+
+                if (typeof selectedOrganization === 'object' && selectedOrganization.hasDepartments) {
+                    deptContainer.style.display = 'block';
+                    deptElement.textContent = selectedDepartment || 'не выбрано';
+                } else {
+                    deptContainer.style.display = 'none';
+                }
+            } else {
+                orgElement.textContent = 'не выбрана';
+                deptContainer.style.display = 'none';
+            }
+        }
+
+        function updateConfirmButton() {
+            const confirmButton = document.getElementById('confirmButton');
+
+            if (!selectedOrganization) {
+                confirmButton.disabled = true;
+                return;
+            }
+
+            if (typeof selectedOrganization === 'object' &&
+                selectedOrganization.hasDepartments &&
+                !selectedDepartment) {
+                confirmButton.disabled = true;
+            } else {
+                confirmButton.disabled = false;
+            }
+        }
+
+        function confirmSelection() {
+            if (!selectedOrganization) {
+                showError('Пожалуйста, выберите организацию');
+                return;
+            }
+
+            if (typeof selectedOrganization === 'object' &&
+                selectedOrganization.hasDepartments &&
+                !selectedDepartment) {
+                showError('Пожалуйста, выберите подразделение');
+                return;
+            }
+
+            const data = {
+                organization: typeof selectedOrganization === 'string'
+                    ? selectedOrganization
+                    : selectedOrganization.name
+            };
+
+            if (selectedDepartment) {
+                data.department = selectedDepartment;
+            }
+
+            console.log('Отправка данных:', data);
+
+            // Отправляем данные в бот
+            if (window.Telegram && Telegram.WebApp && Telegram.WebApp.sendData) {
+                Telegram.WebApp.sendData(JSON.stringify(data));
+            }
+
+            // Закрываем Web App
+            Telegram.WebApp.close();
+        }
+
+        function cancelSelection() {
+            Telegram.WebApp.close();
+        }
+
+        function showError(message) {
+            Telegram.WebApp.showPopup({
+                title: 'Ошибка',
+                message: message,
+                buttons: [{ type: 'ok' }]
+            });
+        }
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
