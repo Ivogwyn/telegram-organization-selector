@@ -21,6 +21,7 @@
 
         .container {
             max-width: 100%;
+            padding-bottom: 80px;
         }
 
         .header {
@@ -47,19 +48,41 @@
             padding: 16px;
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
             border-radius: 12px;
-            text-align: center;
         }
 
-        .selected-organization {
-            font-size: 16px;
+        .selected-item {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .selected-label {
+            color: var(--tg-theme-hint-color, #666666);
+        }
+
+        .selected-value {
             font-weight: 600;
             color: var(--tg-theme-button-color, #2481cc);
+            margin-left: 5px;
         }
 
-        .selected-department {
-            font-size: 14px;
-            margin-top: 8px;
+        .search-section {
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 12px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            background: var(--tg-theme-bg-color, #ffffff);
             color: var(--tg-theme-text-color, #000000);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--tg-theme-button-color, #2481cc);
         }
 
         .organizations-grid {
@@ -114,6 +137,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 8px;
+            margin-bottom: 15px;
         }
 
         .department-button {
@@ -137,14 +161,52 @@
             color: var(--tg-theme-button-text-color, #ffffff);
         }
 
+        .custom-input-section {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 12px;
+        }
+
+        .custom-input-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .custom-input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--tg-theme-secondary-bg-color, #ddd);
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .custom-input:focus {
+            outline: none;
+            border-color: var(--tg-theme-button-color, #2481cc);
+        }
+
+        .custom-input-note {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #666666);
+            text-align: center;
+            margin-top: 10px;
+        }
+
         .actions {
             display: flex;
             gap: 12px;
-            position: sticky;
-            bottom: 0;
+            position: fixed;
+            bottom: 16px;
+            left: 16px;
+            right: 16px;
             background: var(--tg-theme-bg-color, #ffffff);
             padding: 10px 0;
-            margin-top: 10px;
         }
 
         .action-button {
@@ -181,7 +243,25 @@
             transform: none;
         }
 
-        /* Модальное окно для списка */
+        .show-full-list {
+            display: block;
+            width: 100%;
+            margin: 20px auto;
+            padding: 12px 24px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000000);
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .show-full-list:hover {
+            background: var(--tg-theme-hint-color, #e0e0e0);
+        }
+
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -269,22 +349,10 @@
             color: var(--tg-theme-button-text-color, #ffffff);
         }
 
-        .show-full-list {
-            display: block;
-            margin: 20px auto;
-            padding: 12px 24px;
-            background: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .show-full-list:hover {
-            background: #1a6db5;
+        .section-divider {
+            height: 1px;
+            background: var(--tg-theme-secondary-bg-color, #ddd);
+            margin: 20px 0;
         }
 
         @media (max-width: 480px) {
@@ -306,14 +374,30 @@
     <div class="container">
         <div class="header">
             <h1>Выбор организации</h1>
-            <p>Выберите организацию и при необходимости подразделение</p>
+            <p>Выберите организацию из списка или введите свою</p>
         </div>
 
         <div class="selected-info">
-            <div>Выбрана организация: <span class="selected-organization" id="selectedOrganization">не выбрана</span></div>
-            <div class="selected-department" id="selectedDepartmentContainer" style="display: none;">
-                Подразделение: <span class="selected-department" id="selectedDepartment">не выбрано</span>
+            <div class="selected-item">
+                <span class="selected-label">Организация:</span>
+                <span class="selected-value" id="selectedOrganization">не выбрана</span>
             </div>
+            <div class="selected-item" id="selectedDepartmentItem" style="display: none;">
+                <span class="selected-label">Подразделение:</span>
+                <span class="selected-value" id="selectedDepartment">не выбрано</span>
+            </div>
+            <div class="selected-item" id="selectedCustomItem" style="display: none;">
+                <span class="selected-label">Своя организация:</span>
+                <span class="selected-value" id="selectedCustom">не введена</span>
+            </div>
+        </div>
+
+        <div class="search-section">
+            <input type="text"
+                   class="search-input"
+                   placeholder="🔍 Поиск организации..."
+                   id="searchInput"
+                   onkeyup="filterOrganizations()">
         </div>
 
         <div class="organizations-grid" id="organizationsGrid">
@@ -321,18 +405,38 @@
         </div>
 
         <div class="department-selection" id="departmentSelection" style="display: none;">
-            <div class="department-header">Выберите подразделение:</div>
+            <div class="department-header">Выберите подразделение Спецстроя:</div>
             <div class="departments-grid" id="departmentsGrid">
                 <!-- Подразделения будут добавлены через JS -->
+            </div>
+            <div class="custom-input-note">
+                Или введите свое подразделение ниже
+            </div>
+            <input type="text"
+                   class="custom-input"
+                   placeholder="Введите свое подразделение"
+                   id="customDepartmentInput"
+                   onkeyup="updateCustomDepartment()">
+        </div>
+
+        <div class="custom-input-section">
+            <div class="custom-input-title">Не нашли свою организацию?</div>
+            <input type="text"
+                   class="custom-input"
+                   placeholder="Введите название своей организации"
+                   id="customOrganizationInput"
+                   onkeyup="updateCustomOrganization()">
+            <div class="custom-input-note">
+                Ваша организация будет добавлена в список выбора
             </div>
         </div>
 
         <button class="show-full-list" onclick="showFullList()">Показать все организации</button>
+    </div>
 
-        <div class="actions">
-            <button class="action-button cancel" onclick="cancelSelection()">Отмена</button>
-            <button class="action-button confirm" id="confirmButton" onclick="confirmSelection()" disabled>Выбрать</button>
-        </div>
+    <div class="actions">
+        <button class="action-button cancel" onclick="cancelSelection()">Отмена</button>
+        <button class="action-button confirm" id="confirmButton" onclick="confirmSelection()" disabled>Выбрать</button>
     </div>
 
     <!-- Модальное окно для полного списка -->
@@ -404,6 +508,8 @@
 
         let selectedOrganization = null;
         let selectedDepartment = null;
+        let customOrganization = null;
+        let customDepartment = null;
 
         // Основные организации для главной сетки
         const mainOrganizations = [
@@ -431,17 +537,66 @@
                 const org = organizations.find(o =>
                     typeof o === 'string' ? o === orgName : o.name === orgName
                 );
-                const button = document.createElement('button');
-                button.className = 'organization-button';
-                if (selectedOrganization &&
-                    ((typeof selectedOrganization === 'string' && selectedOrganization === orgName) ||
-                     (typeof selectedOrganization === 'object' && selectedOrganization.name === orgName))) {
-                    button.classList.add('selected');
-                }
-                button.textContent = orgName;
-                button.onclick = () => selectOrganization(org);
+                const button = createOrganizationButton(org);
                 grid.appendChild(button);
             });
+        }
+
+        function createOrganizationButton(org) {
+            const orgName = typeof org === 'string' ? org : org.name;
+            const button = document.createElement('button');
+            button.className = 'organization-button';
+
+            // Проверяем выбрана ли организация
+            let isSelected = false;
+            if (selectedOrganization) {
+                if (typeof selectedOrganization === 'string') {
+                    isSelected = selectedOrganization === orgName;
+                } else if (selectedOrganization.name) {
+                    isSelected = selectedOrganization.name === orgName;
+                }
+            }
+
+            if (isSelected) {
+                button.classList.add('selected');
+            }
+
+            button.textContent = orgName;
+            button.onclick = () => selectOrganization(org);
+            return button;
+        }
+
+        function filterOrganizations() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const grid = document.getElementById('organizationsGrid');
+            grid.innerHTML = '';
+
+            if (searchTerm === '') {
+                renderMainOrganizations();
+                return;
+            }
+
+            // Фильтруем все организации по поиску
+            const filteredOrgs = organizations.filter(org => {
+                const orgName = typeof org === 'string' ? org : org.name;
+                return orgName.toLowerCase().includes(searchTerm);
+            });
+
+            // Показываем первые 12 результатов
+            filteredOrgs.slice(0, 12).forEach(org => {
+                const button = createOrganizationButton(org);
+                grid.appendChild(button);
+            });
+
+            // Если ничего не найдено
+            if (filteredOrgs.length === 0) {
+                const noResults = document.createElement('div');
+                noResults.className = 'organization-button';
+                noResults.textContent = 'Не найдено';
+                noResults.style.opacity = '0.5';
+                noResults.style.cursor = 'default';
+                grid.appendChild(noResults);
+            }
         }
 
         function showFullList() {
@@ -453,11 +608,20 @@
                 const orgName = typeof org === 'string' ? org : org.name;
                 const button = document.createElement('button');
                 button.className = 'full-list-button';
-                if (selectedOrganization &&
-                    ((typeof selectedOrganization === 'string' && selectedOrganization === orgName) ||
-                     (typeof selectedOrganization === 'object' && selectedOrganization.name === orgName))) {
+
+                let isSelected = false;
+                if (selectedOrganization) {
+                    if (typeof selectedOrganization === 'string') {
+                        isSelected = selectedOrganization === orgName;
+                    } else if (selectedOrganization.name) {
+                        isSelected = selectedOrganization.name === orgName;
+                    }
+                }
+
+                if (isSelected) {
                     button.classList.add('selected');
                 }
+
                 button.textContent = orgName;
                 button.onclick = () => {
                     selectOrganization(org);
@@ -471,17 +635,25 @@
 
         function hideFullList() {
             document.getElementById('fullListModal').style.display = 'none';
+            document.getElementById('searchInput').value = '';
+            filterOrganizations();
         }
 
         function selectOrganization(org) {
             selectedOrganization = org;
+            customOrganization = null;
             selectedDepartment = null;
+            customDepartment = null;
+
+            // Очищаем поле ввода своей организации
+            document.getElementById('customOrganizationInput').value = '';
 
             // Показываем выбор подразделения если нужно
             const departmentSelection = document.getElementById('departmentSelection');
             if (typeof org === 'object' && org.hasDepartments) {
                 departmentSelection.style.display = 'block';
                 renderDepartments(org.departments);
+                document.getElementById('customDepartmentInput').value = '';
             } else {
                 departmentSelection.style.display = 'none';
             }
@@ -498,7 +670,7 @@
             departments.forEach(dept => {
                 const button = document.createElement('button');
                 button.className = 'department-button';
-                if (selectedDepartment === dept) {
+                if (selectedDepartment === dept && !customDepartment) {
                     button.classList.add('selected');
                 }
                 button.textContent = dept;
@@ -509,45 +681,105 @@
 
         function selectDepartment(dept) {
             selectedDepartment = dept;
+            customDepartment = null;
+            document.getElementById('customDepartmentInput').value = '';
             renderDepartments(selectedOrganization.departments);
+            updateSelectionDisplay();
+            updateConfirmButton();
+        }
+
+        function updateCustomOrganization() {
+            const input = document.getElementById('customOrganizationInput');
+            const value = input.value.trim();
+
+            if (value) {
+                customOrganization = value;
+                selectedOrganization = null;
+                selectedDepartment = null;
+                customDepartment = null;
+
+                // Сбрасываем выбранную организацию из списка
+                renderMainOrganizations();
+
+                // Скрываем выбор подразделения
+                document.getElementById('departmentSelection').style.display = 'none';
+            } else {
+                customOrganization = null;
+            }
+
+            updateSelectionDisplay();
+            updateConfirmButton();
+        }
+
+        function updateCustomDepartment() {
+            const input = document.getElementById('customDepartmentInput');
+            const value = input.value.trim();
+
+            if (value) {
+                customDepartment = value;
+                selectedDepartment = null;
+            } else {
+                customDepartment = null;
+            }
+
             updateSelectionDisplay();
             updateConfirmButton();
         }
 
         function updateSelectionDisplay() {
             const orgElement = document.getElementById('selectedOrganization');
-            const deptContainer = document.getElementById('selectedDepartmentContainer');
+            const deptItem = document.getElementById('selectedDepartmentItem');
             const deptElement = document.getElementById('selectedDepartment');
+            const customItem = document.getElementById('selectedCustomItem');
+            const customElement = document.getElementById('selectedCustom');
 
-            if (selectedOrganization) {
+            // Сбрасываем все отображения
+            deptItem.style.display = 'none';
+            customItem.style.display = 'none';
+
+            if (customOrganization) {
+                // Показываем свою организацию
+                orgElement.textContent = customOrganization;
+                customItem.style.display = 'block';
+                customElement.textContent = customOrganization;
+            } else if (selectedOrganization) {
+                // Показываем выбранную из списка
                 const orgName = typeof selectedOrganization === 'string'
                     ? selectedOrganization
                     : selectedOrganization.name;
                 orgElement.textContent = orgName;
 
+                // Показываем подразделение если есть
                 if (typeof selectedOrganization === 'object' && selectedOrganization.hasDepartments) {
-                    deptContainer.style.display = 'block';
-                    deptElement.textContent = selectedDepartment || 'не выбрано';
-                } else {
-                    deptContainer.style.display = 'none';
+                    deptItem.style.display = 'block';
+                    if (customDepartment) {
+                        deptElement.textContent = customDepartment;
+                    } else if (selectedDepartment) {
+                        deptElement.textContent = selectedDepartment;
+                    } else {
+                        deptElement.textContent = 'не выбрано';
+                    }
                 }
             } else {
                 orgElement.textContent = 'не выбрана';
-                deptContainer.style.display = 'none';
             }
         }
 
         function updateConfirmButton() {
             const confirmButton = document.getElementById('confirmButton');
 
-            if (!selectedOrganization) {
+            // Проверяем, что есть организация
+            if (!selectedOrganization && !customOrganization) {
                 confirmButton.disabled = true;
                 return;
             }
 
-            if (typeof selectedOrganization === 'object' &&
+            // Для Спецстроя проверяем подразделение
+            if (selectedOrganization &&
+                typeof selectedOrganization === 'object' &&
                 selectedOrganization.hasDepartments &&
-                !selectedDepartment) {
+                !selectedDepartment &&
+                !customDepartment) {
                 confirmButton.disabled = true;
             } else {
                 confirmButton.disabled = false;
@@ -555,26 +787,43 @@
         }
 
         function confirmSelection() {
-            if (!selectedOrganization) {
-                showError('Пожалуйста, выберите организацию');
+            // Проверяем обязательные поля
+            if (!selectedOrganization && !customOrganization) {
+                showError('Пожалуйста, выберите или введите организацию');
                 return;
             }
 
-            if (typeof selectedOrganization === 'object' &&
+            if (selectedOrganization &&
+                typeof selectedOrganization === 'object' &&
                 selectedOrganization.hasDepartments &&
-                !selectedDepartment) {
-                showError('Пожалуйста, выберите подразделение');
+                !selectedDepartment &&
+                !customDepartment) {
+                showError('Пожалуйста, выберите или введите подразделение для Спецстроя');
                 return;
             }
 
-            const data = {
-                organization: typeof selectedOrganization === 'string'
-                    ? selectedOrganization
-                    : selectedOrganization.name
-            };
+            // Формируем данные для отправки
+            const data = {};
 
-            if (selectedDepartment) {
+            if (customOrganization) {
+                // Своя организация
+                data.organization = customOrganization;
+                data.is_custom = true;
+            } else {
+                // Организация из списка
+                data.organization = typeof selectedOrganization === 'string'
+                    ? selectedOrganization
+                    : selectedOrganization.name;
+                data.is_custom = false;
+            }
+
+            // Добавляем подразделение если есть
+            if (customDepartment) {
+                data.department = customDepartment;
+                data.department_is_custom = true;
+            } else if (selectedDepartment) {
                 data.department = selectedDepartment;
+                data.department_is_custom = false;
             }
 
             console.log('Отправка данных:', data);
