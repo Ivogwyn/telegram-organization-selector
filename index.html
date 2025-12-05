@@ -24,6 +24,39 @@
             padding-bottom: 80px;
         }
 
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000000);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .mode-button.active {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .section {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .section.active {
+            display: block;
+        }
+
         .header {
             text-align: center;
             margin-bottom: 20px;
@@ -43,8 +76,95 @@
             color: var(--tg-theme-hint-color, #999999);
         }
 
-        /* Стили для режима выбора организации */
-        #organizationSection .selected-info {
+        .calendar-section {
+            margin-bottom: 20px;
+        }
+
+        .month-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
+
+        .month-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .nav-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--tg-theme-button-color, #2481cc);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .nav-button:hover {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #666666);
+            padding: 5px;
+        }
+
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 8px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000000);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .day:hover {
+            background: var(--tg-theme-hint-color, #e0e0e0);
+        }
+
+        .day.selected {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .day.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .day.today {
+            border: 2px solid var(--tg-theme-button-color, #2481cc);
+        }
+
+        /* Стили для выбора организации (такие же как были) */
+        .selected-info {
             margin-bottom: 20px;
             padding: 16px;
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
@@ -198,110 +318,6 @@
             margin-top: 10px;
         }
 
-        /* Стили для режима календаря */
-        #calendarSection .selected-info {
-            margin-bottom: 20px;
-            padding: 16px;
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            border-radius: 12px;
-        }
-
-        .calendar-section {
-            margin-bottom: 20px;
-        }
-
-        .month-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding: 0 10px;
-        }
-
-        .month-title {
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .nav-button {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: var(--tg-theme-button-color, #2481cc);
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-        }
-
-        .nav-button:hover {
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-        }
-
-        .weekdays {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-            margin-bottom: 5px;
-        }
-
-        .weekday {
-            text-align: center;
-            font-size: 12px;
-            color: var(--tg-theme-hint-color, #666666);
-            padding: 5px;
-        }
-
-        .days {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-        }
-
-        .day {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            border-radius: 8px;
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            color: var(--tg-theme-text-color, #000000);
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .day:hover {
-            background: var(--tg-theme-hint-color, #e0e0e0);
-        }
-
-        .day.selected {
-            background: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
-        }
-
-        .day.disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .day.today {
-            border: 2px solid var(--tg-theme-button-color, #2481cc);
-        }
-
-        /* Общие стили */
-        .section {
-            display: none;
-        }
-
-        .section.active {
-            display: block;
-        }
-
         .actions {
             display: flex;
             gap: 12px;
@@ -360,8 +376,14 @@
 </head>
 <body>
     <div class="container">
+        <!-- Переключатель режимов -->
+        <div class="mode-selector">
+            <button class="mode-button active" onclick="switchMode('organization')">🏢 Организация</button>
+            <button class="mode-button" onclick="switchMode('calendar')">📅 Календарь</button>
+        </div>
+
         <!-- Режим выбора организации -->
-        <div id="organizationSection" class="section">
+        <div id="organizationSection" class="section active">
             <div class="header">
                 <h1>Выбор организации</h1>
                 <p>Выберите организацию из списка или введите свою</p>
@@ -466,12 +488,8 @@
         Telegram.WebApp.ready();
         Telegram.WebApp.expand();
 
-        // Определяем режим из URL параметров
-        const urlParams = new URLSearchParams(window.location.search);
-        const mode = urlParams.get('mode') || 'calendar'; // По умолчанию календарь
-
         // Текущий режим
-        let currentMode = mode; // 'organization' или 'calendar'
+        let currentMode = 'organization'; // 'organization' или 'calendar'
         let selectedDate = null;
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
@@ -553,28 +571,32 @@
             "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
         ];
 
+        const dayNames = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+
         function initApp() {
-            // Показываем нужную секцию в зависимости от режима
-            if (currentMode === 'organization') {
-                document.getElementById('organizationSection').classList.add('active');
-                initOrganizationMode();
-            } else {
-                document.getElementById('calendarSection').classList.add('active');
-                initCalendarMode();
-            }
-
-            updateConfirmButton();
-        }
-
-        function initOrganizationMode() {
             renderMainOrganizations();
             updateSelectionDisplay();
-            document.title = "Выбор организации";
+            updateConfirmButton();
+            initCalendar();
         }
 
-        function initCalendarMode() {
-            updateCalendar();
-            document.title = "Выбор даты";
+        function switchMode(mode) {
+            currentMode = mode;
+
+            // Обновляем активные кнопки
+            document.querySelectorAll('.mode-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.mode-button[onclick="switchMode('${mode}')"]`).classList.add('active');
+
+            // Показываем активную секцию
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(`${mode}Section`).classList.add('active');
+
+            // Обновляем кнопку подтверждения
+            updateConfirmButton();
         }
 
         // Функции для организации
@@ -735,6 +757,10 @@
         }
 
         // Функции для календаря
+        function initCalendar() {
+            updateCalendar();
+        }
+
         function updateCalendar() {
             const monthTitle = document.getElementById('currentMonth');
             const daysContainer = document.getElementById('calendarDays');
