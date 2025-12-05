@@ -65,6 +65,29 @@
             margin-left: 5px;
         }
 
+        .show-all-section {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .show-full-list {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000000);
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .show-full-list:hover {
+            background: var(--tg-theme-hint-color, #e0e0e0);
+        }
+
         .search-section {
             margin-bottom: 20px;
         }
@@ -243,25 +266,6 @@
             transform: none;
         }
 
-        .show-full-list {
-            display: block;
-            width: 100%;
-            margin: 20px auto;
-            padding: 12px 24px;
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            color: var(--tg-theme-text-color, #000000);
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .show-full-list:hover {
-            background: var(--tg-theme-hint-color, #e0e0e0);
-        }
-
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -386,6 +390,10 @@
             </div>
         </div>
 
+        <div class="show-all-section">
+            <button class="show-full-list" onclick="showFullList()">Показать все организации</button>
+        </div>
+
         <div class="search-section">
             <input type="text"
                    class="search-input"
@@ -424,8 +432,6 @@
                 Ваша организация будет добавлена в список выбора
             </div>
         </div>
-
-        <button class="show-full-list" onclick="showFullList()">Показать все организации</button>
     </div>
 
     <div class="actions">
@@ -529,16 +535,17 @@
         let customOrganization = null;
         let customDepartment = null;
 
-        // Основные организации для главной сетки
+        // Основные организации для главной сетки - теперь 9 элементов (3x3)
         const mainOrganizations = [
             "ГК Союз",
             "Союз-Инвест",
             "Спецстрой",
-            "Спецстрой-НСК",
+            "Спецстрой-НСК",  // Добавлена после Спецстроя
             "Союз-Инжиниринг",
             "Союз-маркет",
             "Опора",
-            "Вертикаль"
+            "Вертикаль",
+            "Спецтехника"  // Добавлен 9-й элемент для симметрии
         ];
 
         function initApp() {
@@ -600,14 +607,14 @@
                 return orgName.toLowerCase().includes(searchTerm);
             });
 
-            // Показываем первые 12 результатов
-            filteredOrgs.slice(0, 12).forEach(org => {
-                const button = createOrganizationButton(org);
-                grid.appendChild(button);
-            });
-
-            // Если ничего не найдено
-            if (filteredOrgs.length === 0) {
+            // Показываем результаты поиска
+            if (filteredOrgs.length > 0) {
+                filteredOrgs.forEach(org => {
+                    const button = createOrganizationButton(org);
+                    grid.appendChild(button);
+                });
+            } else {
+                // Если ничего не найдено
                 const noResults = document.createElement('div');
                 noResults.className = 'organization-button';
                 noResults.textContent = 'Не найдено';
