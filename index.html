@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Выбор организации</title>
+    <title>Выбор организации и даты</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -22,6 +22,39 @@
         .container {
             max-width: 100%;
             padding-bottom: 80px;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000000);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .mode-button.active {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .section {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .section.active {
+            display: block;
         }
 
         .header {
@@ -43,6 +76,94 @@
             color: var(--tg-theme-hint-color, #999999);
         }
 
+        .calendar-section {
+            margin-bottom: 20px;
+        }
+
+        .month-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
+
+        .month-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .nav-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--tg-theme-button-color, #2481cc);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .nav-button:hover {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #666666);
+            padding: 5px;
+        }
+
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 8px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000000);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .day:hover {
+            background: var(--tg-theme-hint-color, #e0e0e0);
+        }
+
+        .day.selected {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .day.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .day.today {
+            border: 2px solid var(--tg-theme-button-color, #2481cc);
+        }
+
+        /* Стили для выбора организации (такие же как были) */
         .selected-info {
             margin-bottom: 20px;
             padding: 16px;
@@ -63,30 +184,6 @@
             font-weight: 600;
             color: var(--tg-theme-button-color, #2481cc);
             margin-left: 5px;
-        }
-
-        .show-all-section {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .show-full-list {
-            display: block;
-            width: 100%;
-            padding: 16px;
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            color: var(--tg-theme-text-color, #000000);
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-bottom: 20px;
-        }
-
-        .show-full-list:hover {
-            background: var(--tg-theme-hint-color, #e0e0e0);
         }
 
         .search-section {
@@ -266,93 +363,6 @@
             transform: none;
         }
 
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-        }
-
-        .modal-content {
-            background: var(--tg-theme-bg-color, #ffffff);
-            border-radius: 16px;
-            padding: 20px;
-            max-width: 500px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--tg-theme-secondary-bg-color, #f0f0f0);
-        }
-
-        .modal-title {
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: var(--tg-theme-text-color, #000000);
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-        }
-
-        .modal-close:hover {
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-        }
-
-        .full-list-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 8px;
-        }
-
-        .full-list-button {
-            padding: 12px 8px;
-            border: none;
-            border-radius: 8px;
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            color: var(--tg-theme-text-color, #000000);
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-            min-height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .full-list-button:hover {
-            background: var(--tg-theme-hint-color, #e0e0e0);
-        }
-
-        .full-list-button.selected {
-            background: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
-        }
-
         @media (max-width: 480px) {
             .organizations-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -361,74 +371,109 @@
             .departments-grid {
                 grid-template-columns: 1fr;
             }
-
-            .full-list-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Выбор организации</h1>
-            <p>Выберите организацию из списка или введите свою</p>
+        <!-- Переключатель режимов -->
+        <div class="mode-selector">
+            <button class="mode-button active" onclick="switchMode('organization')">🏢 Организация</button>
+            <button class="mode-button" onclick="switchMode('calendar')">📅 Календарь</button>
         </div>
 
-        <div class="selected-info">
-            <div class="selected-item">
-                <span class="selected-label">Организация:</span>
-                <span class="selected-value" id="selectedOrganization">не выбрана</span>
+        <!-- Режим выбора организации -->
+        <div id="organizationSection" class="section active">
+            <div class="header">
+                <h1>Выбор организации</h1>
+                <p>Выберите организацию из списка или введите свою</p>
             </div>
-            <div class="selected-item" id="selectedDepartmentItem" style="display: none;">
-                <span class="selected-label">Подразделение:</span>
-                <span class="selected-value" id="selectedDepartment">не выбрано</span>
+
+            <div class="selected-info">
+                <div class="selected-item">
+                    <span class="selected-label">Организация:</span>
+                    <span class="selected-value" id="selectedOrganization">не выбрана</span>
+                </div>
+                <div class="selected-item" id="selectedDepartmentItem" style="display: none;">
+                    <span class="selected-label">Подразделение:</span>
+                    <span class="selected-value" id="selectedDepartment">не выбрано</span>
+                </div>
             </div>
-            <div class="selected-item" id="selectedCustomItem" style="display: none;">
-                <span class="selected-label">Своя организация:</span>
-                <span class="selected-value" id="selectedCustom">не введена</span>
+
+            <div class="search-section">
+                <input type="text"
+                       class="search-input"
+                       placeholder="🔍 Поиск организации..."
+                       id="searchInput"
+                       onkeyup="filterOrganizations()">
+            </div>
+
+            <div class="organizations-grid" id="organizationsGrid">
+                <!-- Организации будут добавлены через JS -->
+            </div>
+
+            <div class="department-selection" id="departmentSelection" style="display: none;">
+                <div class="department-header" id="departmentHeader">Выберите подразделение:</div>
+                <div class="departments-grid" id="departmentsGrid">
+                    <!-- Подразделения будут добавлены через JS -->
+                </div>
+                <div class="custom-input-note">
+                    Или введите свое подразделение ниже
+                </div>
+                <input type="text"
+                       class="custom-input"
+                       placeholder="Введите свое подразделение"
+                       id="customDepartmentInput"
+                       oninput="updateCustomDepartment()">
+            </div>
+
+            <div class="custom-input-section">
+                <div class="custom-input-title">Не нашли свою организацию?</div>
+                <input type="text"
+                       class="custom-input"
+                       placeholder="Введите название своей организации"
+                       id="customOrganizationInput"
+                       oninput="updateCustomOrganization()">
+                <div class="custom-input-note">
+                    Ваша организация будет добавлена в список выбора
+                </div>
             </div>
         </div>
 
-        <!-- КНОПКА ПОКАЗАТЬ ВСЕ ОРГАНИЗАЦИИ (ТЕПЕРЬ НАД ПОИСКОМ) -->
-        <button class="show-full-list" onclick="showFullList()">Показать все организации</button>
-
-        <div class="search-section">
-            <input type="text"
-                   class="search-input"
-                   placeholder="🔍 Поиск организации..."
-                   id="searchInput"
-                   onkeyup="filterOrganizations()">
-        </div>
-
-        <div class="organizations-grid" id="organizationsGrid">
-            <!-- Организации будут добавлены через JS -->
-        </div>
-
-        <div class="department-selection" id="departmentSelection" style="display: none;">
-            <div class="department-header" id="departmentHeader">Выберите подразделение:</div>
-            <div class="departments-grid" id="departmentsGrid">
-                <!-- Подразделения будут добавлены через JS -->
+        <!-- Режим календаря -->
+        <div id="calendarSection" class="section">
+            <div class="header">
+                <h1 id="calendarTitle">Выберите дату</h1>
+                <p>Выберите дату из календаря ниже</p>
             </div>
-            <div class="custom-input-note">
-                Или введите свое подразделение ниже
-            </div>
-            <input type="text"
-                   class="custom-input"
-                   placeholder="Введите свое подразделение"
-                   id="customDepartmentInput"
-                   oninput="updateCustomDepartment()">
-        </div>
 
-        <div class="custom-input-section">
-            <div class="custom-input-title">Не нашли свою организацию?</div>
-            <input type="text"
-                   class="custom-input"
-                   placeholder="Введите название своей организации"
-                   id="customOrganizationInput"
-                   oninput="updateCustomOrganization()">
-            <div class="custom-input-note">
-                Ваша организация будет добавлена в список выбора
+            <div class="selected-info">
+                <div class="selected-item">
+                    <span class="selected-label">Выбранная дата:</span>
+                    <span class="selected-value" id="selectedDate">не выбрана</span>
+                </div>
+            </div>
+
+            <div class="calendar-section">
+                <div class="month-header">
+                    <button class="nav-button" onclick="changeMonth(-1)">←</button>
+                    <div class="month-title" id="currentMonth"></div>
+                    <button class="nav-button" onclick="changeMonth(1)">→</button>
+                </div>
+
+                <div class="weekdays">
+                    <div class="weekday">Пн</div>
+                    <div class="weekday">Вт</div>
+                    <div class="weekday">Ср</div>
+                    <div class="weekday">Чт</div>
+                    <div class="weekday">Пт</div>
+                    <div class="weekday">Сб</div>
+                    <div class="weekday">Вс</div>
+                </div>
+
+                <div class="days" id="calendarDays">
+                    <!-- Дни будут добавлены через JS -->
+                </div>
             </div>
         </div>
     </div>
@@ -438,25 +483,18 @@
         <button class="action-button confirm" id="confirmButton" onclick="confirmSelection()" disabled>Выбрать</button>
     </div>
 
-    <!-- Модальное окно для полного списка -->
-    <div class="modal-overlay" id="fullListModal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Все организации</div>
-                <button class="modal-close" onclick="hideFullList()">×</button>
-            </div>
-            <div class="full-list-grid" id="fullListGrid">
-                <!-- Все организации будут добавлены через JS -->
-            </div>
-        </div>
-    </div>
-
     <script>
         // Инициализация Telegram Web App
         Telegram.WebApp.ready();
         Telegram.WebApp.expand();
 
-        // Подразделения для Спецстрой-НСК (только у нее есть подразделения)
+        // Текущий режим
+        let currentMode = 'organization'; // 'organization' или 'calendar'
+        let selectedDate = null;
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+
+        // Подразделения для Спецстрой-НСК
         const specstroyNskDepartments = [
             "Строительно-монтажный участок - 1",
             "Строительно-монтажный участок - 2",
@@ -476,9 +514,9 @@
         const organizations = [
             "ГК Союз",
             "Союз-Инвест",
-            "Спецстрой",  // БЕЗ подразделений
+            "Спецстрой",
             {
-                name: "Спецстрой-НСК",  // ТОЛЬКО у нее есть подразделения
+                name: "Спецстрой-НСК",
                 hasDepartments: true,
                 departments: specstroyNskDepartments
             },
@@ -518,8 +556,8 @@
         const mainOrganizations = [
             "ГК Союз",
             "Союз-Инвест",
-            "Спецстрой",  // Без подразделений
-            "Спецстрой-НСК",  // С подразделениями
+            "Спецстрой",
+            "Спецстрой-НСК",
             "Союз-Инжиниринг",
             "Союз-маркет",
             "Опора",
@@ -527,12 +565,41 @@
             "Спецтехника"
         ];
 
+        // Функции для календаря
+        const monthNames = [
+            "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+            "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+        ];
+
+        const dayNames = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+
         function initApp() {
             renderMainOrganizations();
             updateSelectionDisplay();
             updateConfirmButton();
+            initCalendar();
         }
 
+        function switchMode(mode) {
+            currentMode = mode;
+
+            // Обновляем активные кнопки
+            document.querySelectorAll('.mode-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.mode-button[onclick="switchMode('${mode}')"]`).classList.add('active');
+
+            // Показываем активную секцию
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(`${mode}Section`).classList.add('active');
+
+            // Обновляем кнопку подтверждения
+            updateConfirmButton();
+        }
+
+        // Функции для организации
         function renderMainOrganizations() {
             const grid = document.getElementById('organizationsGrid');
             grid.innerHTML = '';
@@ -551,7 +618,6 @@
             const button = document.createElement('button');
             button.className = 'organization-button';
 
-            // Проверяем выбрана ли организация
             let isSelected = false;
             if (selectedOrganization) {
                 if (typeof selectedOrganization === 'string') {
@@ -580,20 +646,17 @@
                 return;
             }
 
-            // Фильтруем все организации по поиску
             const filteredOrgs = organizations.filter(org => {
                 const orgName = typeof org === 'string' ? org : org.name;
                 return orgName.toLowerCase().includes(searchTerm);
             });
 
-            // Показываем результаты поиска
             if (filteredOrgs.length > 0) {
                 filteredOrgs.forEach(org => {
                     const button = createOrganizationButton(org);
                     grid.appendChild(button);
                 });
             } else {
-                // Если ничего не найдено
                 const noResults = document.createElement('div');
                 noResults.className = 'organization-button';
                 noResults.textContent = 'Не найдено';
@@ -603,56 +666,14 @@
             }
         }
 
-        function showFullList() {
-            const modal = document.getElementById('fullListModal');
-            const grid = document.getElementById('fullListGrid');
-            grid.innerHTML = '';
-
-            organizations.forEach(org => {
-                const orgName = typeof org === 'string' ? org : org.name;
-                const button = document.createElement('button');
-                button.className = 'full-list-button';
-
-                let isSelected = false;
-                if (selectedOrganization) {
-                    if (typeof selectedOrganization === 'string') {
-                        isSelected = selectedOrganization === orgName;
-                    } else if (selectedOrganization.name) {
-                        isSelected = selectedOrganization.name === orgName;
-                    }
-                }
-
-                if (isSelected) {
-                    button.classList.add('selected');
-                }
-
-                button.textContent = orgName;
-                button.onclick = () => {
-                    selectOrganization(org);
-                    hideFullList();
-                };
-                grid.appendChild(button);
-            });
-
-            modal.style.display = 'flex';
-        }
-
-        function hideFullList() {
-            document.getElementById('fullListModal').style.display = 'none';
-            document.getElementById('searchInput').value = '';
-            filterOrganizations();
-        }
-
         function selectOrganization(org) {
             selectedOrganization = org;
             customOrganization = null;
             selectedDepartment = null;
             customDepartment = null;
 
-            // Очищаем поле ввода своей организации
             document.getElementById('customOrganizationInput').value = '';
 
-            // Показываем выбор подразделения ТОЛЬКО для Спецстрой-НСК
             const departmentSelection = document.getElementById('departmentSelection');
             const departmentHeader = document.getElementById('departmentHeader');
 
@@ -705,13 +726,8 @@
                 selectedDepartment = null;
                 customDepartment = null;
 
-                // Сбрасываем выбранную организацию из списка
                 renderMainOrganizations();
-
-                // Скрываем выбор подразделения
                 document.getElementById('departmentSelection').style.display = 'none';
-
-                // Очищаем поле поиска
                 document.getElementById('searchInput').value = '';
                 filterOrganizations();
             } else {
@@ -729,7 +745,6 @@
             if (value && value.length > 0) {
                 customDepartment = value;
                 selectedDepartment = null;
-                // Снимаем выделение с кнопок подразделений
                 if (selectedOrganization && selectedOrganization.departments) {
                     renderDepartments(selectedOrganization.departments);
                 }
@@ -741,30 +756,100 @@
             updateConfirmButton();
         }
 
+        // Функции для календаря
+        function initCalendar() {
+            updateCalendar();
+        }
+
+        function updateCalendar() {
+            const monthTitle = document.getElementById('currentMonth');
+            const daysContainer = document.getElementById('calendarDays');
+
+            monthTitle.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            daysContainer.innerHTML = '';
+
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const firstDayIndex = firstDay.getDay();
+
+            // Пустые ячейки для первого дня недели
+            for (let i = 0; i < (firstDayIndex === 0 ? 6 : firstDayIndex - 1); i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'day disabled';
+                daysContainer.appendChild(emptyDay);
+            }
+
+            // Дни месяца
+            const today = new Date();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(currentYear, currentMonth, day);
+                const dayButton = document.createElement('button');
+                dayButton.className = 'day';
+
+                // Проверяем сегодняшний день
+                if (date.getDate() === today.getDate() &&
+                    date.getMonth() === today.getMonth() &&
+                    date.getFullYear() === today.getFullYear()) {
+                    dayButton.classList.add('today');
+                }
+
+                // Проверяем выбранный день
+                if (selectedDate &&
+                    date.getDate() === selectedDate.getDate() &&
+                    date.getMonth() === selectedDate.getMonth() &&
+                    date.getFullYear() === selectedDate.getFullYear()) {
+                    dayButton.classList.add('selected');
+                }
+
+                dayButton.textContent = day;
+                dayButton.onclick = () => selectDate(date);
+                daysContainer.appendChild(dayButton);
+            }
+        }
+
+        function changeMonth(delta) {
+            currentMonth += delta;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            updateCalendar();
+        }
+
+        function selectDate(date) {
+            selectedDate = date;
+            updateCalendar();
+
+            // Форматируем дату для отображения
+            const formattedDate = date.toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            }).replace(/\//g, '.');
+
+            document.getElementById('selectedDate').textContent = formattedDate;
+            updateConfirmButton();
+        }
+
         function updateSelectionDisplay() {
             const orgElement = document.getElementById('selectedOrganization');
             const deptItem = document.getElementById('selectedDepartmentItem');
             const deptElement = document.getElementById('selectedDepartment');
-            const customItem = document.getElementById('selectedCustomItem');
-            const customElement = document.getElementById('selectedCustom');
 
-            // Сбрасываем все отображения
             deptItem.style.display = 'none';
-            customItem.style.display = 'none';
 
             if (customOrganization) {
-                // Показываем свою организацию
                 orgElement.textContent = customOrganization;
-                customItem.style.display = 'block';
-                customElement.textContent = customOrganization;
             } else if (selectedOrganization) {
-                // Показываем выбранную из списка
                 const orgName = typeof selectedOrganization === 'string'
                     ? selectedOrganization
                     : selectedOrganization.name;
                 orgElement.textContent = orgName;
 
-                // Показываем подразделение ТОЛЬКО для Спецстрой-НСК
                 if (typeof selectedOrganization === 'object' &&
                     selectedOrganization.name === "Спецстрой-НСК" &&
                     selectedOrganization.hasDepartments) {
@@ -785,75 +870,77 @@
         function updateConfirmButton() {
             const confirmButton = document.getElementById('confirmButton');
 
-            // Проверяем, что есть организация
-            if (!selectedOrganization && !customOrganization) {
-                confirmButton.disabled = true;
-                return;
-            }
+            if (currentMode === 'organization') {
+                if (!selectedOrganization && !customOrganization) {
+                    confirmButton.disabled = true;
+                    return;
+                }
 
-            // Проверяем подразделение ТОЛЬКО для Спецстрой-НСК
-            if (selectedOrganization &&
-                typeof selectedOrganization === 'object' &&
-                selectedOrganization.name === "Спецстрой-НСК" &&
-                selectedOrganization.hasDepartments &&
-                !selectedDepartment &&
-                !customDepartment) {
-                confirmButton.disabled = true;
-            } else {
-                confirmButton.disabled = false;
+                if (selectedOrganization &&
+                    typeof selectedOrganization === 'object' &&
+                    selectedOrganization.name === "Спецстрой-НСК" &&
+                    selectedOrganization.hasDepartments &&
+                    !selectedDepartment &&
+                    !customDepartment) {
+                    confirmButton.disabled = true;
+                } else {
+                    confirmButton.disabled = false;
+                }
+            } else if (currentMode === 'calendar') {
+                confirmButton.disabled = !selectedDate;
             }
         }
 
         function confirmSelection() {
-            // Проверяем обязательные поля
-            if (!selectedOrganization && !customOrganization) {
-                showError('Пожалуйста, выберите или введите организацию');
-                return;
-            }
+            let data = {};
 
-            // Проверяем подразделение ТОЛЬКО для Спецстрой-НСК
-            if (selectedOrganization &&
-                typeof selectedOrganization === 'object' &&
-                selectedOrganization.name === "Спецстрой-НСК" &&
-                selectedOrganization.hasDepartments &&
-                !selectedDepartment &&
-                !customDepartment) {
-                showError('Пожалуйста, выберите или введите подразделение для Спецстрой-НСК');
-                return;
-            }
+            if (currentMode === 'organization') {
+                if (!selectedOrganization && !customOrganization) {
+                    showError('Пожалуйста, выберите или введите организацию');
+                    return;
+                }
 
-            // Формируем данные для отправки
-            const data = {};
+                if (selectedOrganization &&
+                    typeof selectedOrganization === 'object' &&
+                    selectedOrganization.name === "Спецстрой-НСК" &&
+                    selectedOrganization.hasDepartments &&
+                    !selectedDepartment &&
+                    !customDepartment) {
+                    showError('Пожалуйста, выберите или введите подразделение для Спецстрой-НСК');
+                    return;
+                }
 
-            if (customOrganization) {
-                // Своя организация
-                data.organization = customOrganization;
-                data.is_custom = true;
-            } else {
-                // Организация из списка
-                data.organization = typeof selectedOrganization === 'string'
-                    ? selectedOrganization
-                    : selectedOrganization.name;
-                data.is_custom = false;
-            }
-
-            // Добавляем подразделение если есть (только для Спецстрой-НСК)
-            if (customDepartment) {
-                data.department = customDepartment;
-                data.department_is_custom = true;
-            } else if (selectedDepartment) {
-                data.department = selectedDepartment;
-                data.department_is_custom = false;
+                if (customOrganization) {
+                    data.organization = customOrganization;
+                    if (customDepartment) {
+                        data.department = customDepartment;
+                    }
+                } else {
+                    data.organization = typeof selectedOrganization === 'string'
+                        ? selectedOrganization
+                        : selectedOrganization.name;
+                    if (selectedDepartment || customDepartment) {
+                        data.department = customDepartment || selectedDepartment;
+                    }
+                }
+            } else if (currentMode === 'calendar') {
+                if (!selectedDate) {
+                    showError('Пожалуйста, выберите дату');
+                    return;
+                }
+                data.date = selectedDate.toLocaleDateString('ru-RU', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                }).replace(/\//g, '.');
             }
 
             console.log('Отправка данных:', data);
 
-            // Отправляем данные в бот
             if (window.Telegram && Telegram.WebApp && Telegram.WebApp.sendData) {
                 Telegram.WebApp.sendData(JSON.stringify(data));
             }
 
-            // Закрываем Web App
             Telegram.WebApp.close();
         }
 
@@ -869,7 +956,6 @@
             });
         }
 
-        // Инициализация при загрузке
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
