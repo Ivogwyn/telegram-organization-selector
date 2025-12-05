@@ -349,12 +349,6 @@
             color: var(--tg-theme-button-text-color, #ffffff);
         }
 
-        .section-divider {
-            height: 1px;
-            background: var(--tg-theme-secondary-bg-color, #ddd);
-            margin: 20px 0;
-        }
-
         @media (max-width: 480px) {
             .organizations-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -405,7 +399,7 @@
         </div>
 
         <div class="department-selection" id="departmentSelection" style="display: none;">
-            <div class="department-header">Выберите подразделение Спецстроя:</div>
+            <div class="department-header" id="departmentHeader">Выберите подразделение:</div>
             <div class="departments-grid" id="departmentsGrid">
                 <!-- Подразделения будут добавлены через JS -->
             </div>
@@ -416,7 +410,7 @@
                    class="custom-input"
                    placeholder="Введите свое подразделение"
                    id="customDepartmentInput"
-                   onkeyup="updateCustomDepartment()">
+                   oninput="updateCustomDepartment()">
         </div>
 
         <div class="custom-input-section">
@@ -425,7 +419,7 @@
                    class="custom-input"
                    placeholder="Введите название своей организации"
                    id="customOrganizationInput"
-                   onkeyup="updateCustomOrganization()">
+                   oninput="updateCustomOrganization()">
             <div class="custom-input-note">
                 Ваша организация будет добавлена в список выбора
             </div>
@@ -457,6 +451,38 @@
         Telegram.WebApp.ready();
         Telegram.WebApp.expand();
 
+        // Подразделения для Спецстроя
+        const specstroyDepartments = [
+            "Строительно-монтажный участок - 1",
+            "Строительно-монтажный участок - 2",
+            "Строительно-монтажный участок - 3",
+            "Строительно-монтажный участок - 4",
+            "Участок по обслуживанию грузоподъемных механизмов",
+            "Транспортный участок",
+            "Административно-управленческое подразделение",
+            "Строительно-монтажный участок (АУП)",
+            "Производственно-технический отдел",
+            "Административно-хозяйственный отдел",
+            "Отдел главного энергетика",
+            "Служба безопасности"
+        ];
+
+        // Подразделения для Спецстрой-НСК
+        const specstroyNskDepartments = [
+            "Строительно-монтажный участок - 1",
+            "Строительно-монтажный участок - 2",
+            "Строительно-монтажный участок - 3",
+            "Строительно-монтажный участок - 4",
+            "Участок по обслуживанию грузоподъемных механизмов",
+            "Транспортный участок",
+            "Административно-управленческое подразделение",
+            "Строительно-монтажный участок (АУП)",
+            "Производственно-технический отдел",
+            "Административно-хозяйственный отдел",
+            "Отдел главного энергетика",
+            "Служба безопасности"
+        ];
+
         // Данные организаций
         const organizations = [
             "ГК Союз",
@@ -464,20 +490,12 @@
             {
                 name: "Спецстрой",
                 hasDepartments: true,
-                departments: [
-                    "Строительно-монтажный участок - 1",
-                    "Строительно-монтажный участок - 2",
-                    "Строительно-монтажный участок - 3",
-                    "Строительно-монтажный участок - 4",
-                    "Участок по обслуживанию грузоподъемных механизмов",
-                    "Транспортный участок",
-                    "Административно-управленческое подразделение",
-                    "Строительно-монтажный участок (АУП)",
-                    "Производственно-технический отдел",
-                    "Административно-хозяйственный отдел",
-                    "Отдел главного энергетика",
-                    "Служба безопасности"
-                ]
+                departments: specstroyDepartments
+            },
+            {
+                name: "Спецстрой-НСК",
+                hasDepartments: true,
+                departments: specstroyNskDepartments
             },
             "Союз-Инжиниринг",
             "Союз-маркет",
@@ -516,11 +534,11 @@
             "ГК Союз",
             "Союз-Инвест",
             "Спецстрой",
+            "Спецстрой-НСК",
             "Союз-Инжиниринг",
             "Союз-маркет",
             "Опора",
-            "Вертикаль",
-            "Спецтехника"
+            "Вертикаль"
         ];
 
         function initApp() {
@@ -650,8 +668,11 @@
 
             // Показываем выбор подразделения если нужно
             const departmentSelection = document.getElementById('departmentSelection');
+            const departmentHeader = document.getElementById('departmentHeader');
+
             if (typeof org === 'object' && org.hasDepartments) {
                 departmentSelection.style.display = 'block';
+                departmentHeader.textContent = `Выберите подразделение ${org.name}:`;
                 renderDepartments(org.departments);
                 document.getElementById('customDepartmentInput').value = '';
             } else {
@@ -692,7 +713,7 @@
             const input = document.getElementById('customOrganizationInput');
             const value = input.value.trim();
 
-            if (value) {
+            if (value && value.length > 0) {
                 customOrganization = value;
                 selectedOrganization = null;
                 selectedDepartment = null;
@@ -703,6 +724,10 @@
 
                 // Скрываем выбор подразделения
                 document.getElementById('departmentSelection').style.display = 'none';
+
+                // Очищаем поле поиска
+                document.getElementById('searchInput').value = '';
+                filterOrganizations();
             } else {
                 customOrganization = null;
             }
@@ -715,9 +740,11 @@
             const input = document.getElementById('customDepartmentInput');
             const value = input.value.trim();
 
-            if (value) {
+            if (value && value.length > 0) {
                 customDepartment = value;
                 selectedDepartment = null;
+                // Снимаем выделение с кнопок подразделений
+                renderDepartments(selectedOrganization.departments);
             } else {
                 customDepartment = null;
             }
@@ -774,7 +801,7 @@
                 return;
             }
 
-            // Для Спецстроя проверяем подразделение
+            // Для организаций с подразделениями проверяем подразделение
             if (selectedOrganization &&
                 typeof selectedOrganization === 'object' &&
                 selectedOrganization.hasDepartments &&
@@ -798,7 +825,8 @@
                 selectedOrganization.hasDepartments &&
                 !selectedDepartment &&
                 !customDepartment) {
-                showError('Пожалуйста, выберите или введите подразделение для Спецстроя');
+                const orgName = selectedOrganization.name;
+                showError(`Пожалуйста, выберите или введите подразделение для ${orgName}`);
                 return;
             }
 
