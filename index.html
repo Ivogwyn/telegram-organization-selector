@@ -831,9 +831,10 @@
                 data.is_custom = true;
             } else {
                 // Организация из списка
-                data.organization = typeof selectedOrganization === 'string'
+                const orgName = typeof selectedOrganization === 'string'
                     ? selectedOrganization
                     : selectedOrganization.name;
+                data.organization = orgName;
                 data.is_custom = false;
             }
 
@@ -844,6 +845,11 @@
             } else if (selectedDepartment) {
                 data.department = selectedDepartment;
                 data.department_is_custom = false;
+            } else if (typeof selectedOrganization === 'string') {
+                // Для организаций без подразделений используем имя организации как подразделение
+                data.department = data.organization;
+            } else {
+                data.department = data.organization;
             }
 
             console.log('Отправка данных:', data);
